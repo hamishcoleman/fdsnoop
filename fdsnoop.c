@@ -21,13 +21,9 @@ void print_child_buf(int pid, unsigned long int buf, int count) {
 		printf("ERROR: negative count!\n");
 		return;
 	}
-	while (count) {
-		char ch;
-		/* FIXME - this uses unaligned accesses */
-		ch = ptrace(PTRACE_PEEKDATA,pid,buf,NULL);
-		buf++;
-		count--;
-		printf("%c",ch);
+	/* FIXME - this uses unaligned accesses */
+	while (count--) {
+		printf("%c",ptrace(PTRACE_PEEKDATA,pid,buf++,NULL));
 	}
 	fflush(stdout);
 }
@@ -77,7 +73,6 @@ void handle_syscall(int pid, int wantfd) {
 		if (args[0] == wantfd) {
 			print_child_buf(pid,args[1],total);
 		}
-
 	}
 }
 
