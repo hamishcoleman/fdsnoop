@@ -62,30 +62,23 @@ void handle_syscall(int pid, int wantfd) {
 	/* strace uses CS==0x23 to indicate 32bit */
 
 	int syscall = get_syscallnr(pid);
+	unsigned long int args[3];
 	if (syscall == __NR_read) {
-		unsigned long int args[3];
 		get_args3(pid,args);
-
-		int fd = args[0];
-		unsigned long int buf = args[1];
-		int count = args[2];
-
-		/* allow the syscall to complete */
-		ptrace(PTRACE_SYSCALL,pid,NULL,NULL);
-		wait(NULL);
-		/* FIXME - we should care about the wait result */
-
-		int total = get_result(pid);
-		if (fd == wantfd) {
-			print_child_buf(pid,buf,total);
-		}
-
-		return;
 	}
 
 	/* allow the syscall to complete */
 	ptrace(PTRACE_SYSCALL,pid,NULL,NULL);
 	wait(NULL);
+	/* FIXME - we should care about the wait result */
+
+	if (syscall == __NR_read) {
+		int total = get_result(pid);
+		if (args[0] == wantfd) {
+			print_child_buf(pid,args[1],total);
+		}
+
+	}
 }
 
 int main(int argc, char **argv) {
