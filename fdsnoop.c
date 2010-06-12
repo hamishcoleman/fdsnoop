@@ -9,6 +9,7 @@
 #include <sys/user.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/reg.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,15 +33,12 @@ void print_child_buf(int pid, unsigned long int buf, int count) {
 }
 
 int get_syscallnr(int pid) {
-	/* FIXME - use PEEKUSER */
-	struct user_regs_struct uregs;
-	ptrace(PTRACE_GETREGS,pid,NULL, &uregs);
 	/* FIXME - amd64 specific */
-	return uregs.orig_rax;
+	return ptrace(PTRACE_PEEKUSER,pid,8*ORIG_RAX,NULL);
 }
 
 int get_args3(int pid, unsigned long int args[3]) {
-	/* FIXME - use PEEKUSER */
+	/* could use PEEKUSER, but that requires 3 ptrace calls */
 	struct user_regs_struct uregs;
 	ptrace(PTRACE_GETREGS,pid,NULL, &uregs);
 
@@ -53,11 +51,8 @@ int get_args3(int pid, unsigned long int args[3]) {
 }
 
 int get_result(int pid) {
-	/* FIXME - use PEEKUSER */
-	struct user_regs_struct uregs;
-	ptrace(PTRACE_GETREGS,pid,NULL, &uregs);
 	/* FIXME - amd64 specific */
-	return uregs.rax;
+	return ptrace(PTRACE_PEEKUSER,pid,8*RAX,NULL);
 }
 
 void handle_syscall(int pid, int wantfd) {
