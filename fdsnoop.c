@@ -4,6 +4,8 @@
  * Designed to attach to a sshd and show the user's session traffic
  */
 
+#define VERSION "0.1"
+
 #include <sys/ptrace.h>
 #include <signal.h>
 #include <sys/user.h>
@@ -76,9 +78,19 @@ void handle_syscall(int pid, int wantfd) {
 	}
 }
 
+void usage(char *argv0) {
+	printf("File descriptor snooper (Version %s)\n",VERSION);
+	printf("Usage: %s pid fd\n",argv0);
+	printf("\tOnly until a real option parser gets written\n");
+}
+
 int main(int argc, char **argv) {
 
-	/* FIXME - help message */
+	if (argc<3) {
+		usage(argv[0]);
+		return(1);
+	}
+
 	/* FIXME - getopt & check args */
 	int pid = strtol(argv[1],NULL,0);
 	int fd = strtol(argv[2],NULL,0);
